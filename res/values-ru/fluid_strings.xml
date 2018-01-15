@@ -20,4 +20,6 @@
     <string name="hidden_label">Спрятана</string>
     <string name="long_label">Длинная</string>
 
+    <!-- Volume link notification -->
+    <string name="volume_link_notification_title">Связать громкость звонка и уведомлений</string>
 </resources>
