@@ -71,6 +71,7 @@ public class DataUsageSummaryTest {
     private TelephonyManager mTelephonyManager;
     private Context mContext;
     private FragmentActivity mActivity;
+    private SummaryLoader.SummaryProvider mSummaryProvider;
 
     /**
      * This set up is contrived to get a passing test so that the build doesn't block without tests.
@@ -92,6 +93,9 @@ public class DataUsageSummaryTest {
         shadowTelephonyManager.setTelephonyManagerForSubscriptionId(1, mTelephonyManager);
         mActivity = spy(Robolectric.buildActivity(FragmentActivity.class).get());
         doReturn(mNetworkStatsManager).when(mActivity).getSystemService(NetworkStatsManager.class);
+
+        mSummaryProvider = DataUsageSummary.SUMMARY_PROVIDER_FACTORY
+                .createSummaryProvider(mActivity, mSummaryLoader);
     }
 
     @Test
@@ -101,6 +105,20 @@ public class DataUsageSummaryTest {
                 DataUsageSummary.formatUsage(mContext, "^1", usage).toString();
         final CharSequence formattedInIECUnit = DataUsageUtils.formatDataUsage(mContext, usage);
         assertThat(formattedUsage).isEqualTo(formattedInIECUnit);
+    }
+
+    @Test
+    public void setListening_shouldBlankSummaryWithNoSim() {
+        ShadowDataUsageUtils.HAS_SIM = false;
+        mSummaryProvider.setListening(true);
+        verify(mSummaryLoader).setSummary(mSummaryProvider, null);
+    }
+
+    @Test
+    public void setListening_shouldSetSummaryWithSim() {
+        ShadowDataUsageUtils.HAS_SIM = true;
+        mSummaryProvider.setListening(true);
+        verify(mSummaryLoader).setSummary(anyObject(), endsWith(" of data used"));
     }
 
     @Test
